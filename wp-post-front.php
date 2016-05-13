@@ -192,16 +192,16 @@ class WP_Post_Front {
         if( !current_user_can( 'edit_posts') ) return;
 
         parse_str($_POST['postdata'],$postdata);
-
         $postdata['post_type'] = $_POST['post_type'];
-
         $post_id = wp_insert_post($postdata);
 
         if( $post_id ) {
+
             $res = array(
                 'id' => $post_id,
                 'redirect_url' => get_permalink($post_id)
             );
+
         } else {
             $res = array(
                 'error' => $_POST['post_type'].' not created !'
