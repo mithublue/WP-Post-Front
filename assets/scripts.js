@@ -38,8 +38,7 @@
 
                 $(document).on( 'click' , '#post-submit' , function() {
                     wpf_script.save_post();
-                   // $('.front-post-modal').remove(); return false;
-                    return false;
+                   $('.front-post-modal').remove(); return false;
                 });
             },
 
@@ -71,7 +70,6 @@
                     function(res) {
                         if( res ) {
                             var data = JSON.parse(res);
-                            console.log(data);
                             if( typeof data == 'object' ) {
                                 if ( !data.errors ) {
                                     wpf_script.addTaxData( term , taxonomy , data );
@@ -101,7 +99,7 @@
                 //
             },
 
-            addTag : function( taxonomy,  tagAddBtn ) {
+            addTag : function( taxonomy ) {
                 $('#tax-input-' + taxonomy).val( $('input[name="newtag['+ taxonomy +']"]').val() );
                 $('input[name="newtag['+ taxonomy +']"]').val('');
             },
@@ -112,10 +110,18 @@
                         wpf_data.ajaxurl,
                         {
                             action : 'wpf_save_post',
-                            postdata : $('form.wpf-add-post-form').serialize()
+                            postdata : $('form.wpf-add-post-form').serialize(),
+                            post_type : wpf_data.post_type,
+                            token : wpf_data.main_nonce
                         },
                         function(res) {
-                            console.log(res);
+                            var res = JSON.parse(res);
+                            if( typeof  res.error != 'undefined' ) {
+                                alert(res.error);
+                            } else {
+                                window.location = res.redirect_url ;
+                            }
+
                         }
                     )
             }

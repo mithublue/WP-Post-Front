@@ -1,4 +1,50 @@
-.wpf_post_modal {
+.front-post-modal {
+  /*position: absolute;
+  z-index: 999;
+  left: 0;
+  right: 0;
+  top: 49px;
+  bottom: 0;
+  height: 100%;*/
+  position: fixed;
+  /* Stay in place */
+  z-index: 1;
+  /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
+  overflow: auto;
+  /* Enable scroll if needed */
+}
+.front-post-modal ul li {
+  list-style: none;
+}
+.front-post-modal #wpf-add-post-container {
+  margin: 5% auto;
+  /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #dddddd;
   width: 80%;
+  /* Could be more or less, depending on screen size */
+}
+.front-post-modal #wpf-add-post-container .wpf-form-field {
+  margin-bottom: 20px ;
+}
+.front-post-modal #wpf-add-post-container .wpf-form-field label,
+.front-post-modal #wpf-add-post-container .wpf-form-field input,
+.front-post-modal #wpf-add-post-container .wpf-form-field textarea,
+.front-post-modal #wpf-add-post-container .wpf-form-field select {
+  display: block;
+}
+.front-post-modal #wpf-add-post-container .wpf-form-field input[type="text"] {
+  width: 100%;
+}
+.front-post-modal #wpf-add-post-container .wpf-form-field textarea.tax-input-* {
+  background: none;
+  border: none;
+  height: 10px;
 }
 /*# sourceMappingURL=style.css.map */

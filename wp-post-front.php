@@ -72,7 +72,7 @@ class WP_Post_Front {
 
         add_action( 'wp_ajax_wpf_save_post', array( $this, 'wpf_save_post' ) );
         add_action( 'wp_ajax_nopriv_wpf_save_post', array( $this, 'wpf_save_post' ) );
-        //will be added later for the modal
+
         $this->includes();
     }
 
@@ -84,7 +84,7 @@ class WP_Post_Front {
 
         global $post;
 
-        if( !is_single() ) return $content;
+        if( !is_single() && !is_page() ) return $content;
 
         if ( !is_user_logged_in() ) return $content;
 
@@ -95,6 +95,12 @@ class WP_Post_Front {
 
     }
 
+    /**
+     * Include necessary files
+     */
+    function includes(){
+        require_once dirname(__FILE__).'/includes/wpf-functions.php';
+    }
 
     /**
      * Initializes the WP_Post_Front() class
@@ -107,6 +113,7 @@ class WP_Post_Front {
      * @return void
      */
     public static function init() {
+
         static $instance = false;
 
         if ( ! $instance ) {
@@ -122,26 +129,16 @@ class WP_Post_Front {
      * @return void
      */
     function wp_enqueue_scripts_styles() {
+        global $post;
 
-        if ( !is_single()  || !is_user_logged_in() ) return;
+        if ( ( !is_single() && !is_page() )  || !is_user_logged_in() ) return;
 
+        wp_enqueue_style( 'wpf-style', plugins_url( 'assets/style.css', __FILE__ ) );
         wp_enqueue_script( 'wpf-script', plugins_url( 'assets/scripts.js', __FILE__ ), array( 'jquery', 'jquery-ui-autocomplete' ) );
-
-        ?>
-        <script>
-            var ajaxurl = '<?php echo admin_url('admin-ajax.php');?>';
-        </script>
-        <?php
-        wp_enqueue_script('jquery-ui-autocomplete');
-        wp_enqueue_script('jquery-ui-sortable');
-        wp_enqueue_script( 'wp-ajax-responce-js', includes_url( 'js/wp-ajax-response.js', __FILE__ ), array( 'jquery' ) );//need for postboxjs
-        wp_enqueue_script( 'wp-wplist-js', includes_url( 'js/wp-lists.js', __FILE__ ), array( 'jquery', 'wp-ajax-responce-js' ) );//need for postboxjs
-        wp_enqueue_script( 'wp-postbox-js', admin_url( 'js/postbox.js', __FILE__ ), array( 'jquery', 'wp-wplist-js', 'jquery-ui-sortable' ) );//need for linkJS
-        wp_enqueue_script( 'wp-link-js', admin_url( 'js/link.js', __FILE__ ), array( 'jquery' ) );
-
-
         wp_localize_script( 'wpf-script' , 'wpf_data' , array(
-            'ajaxurl' => admin_url('admin-ajax.php')
+            'main_nonce' => wp_create_nonce( 'wpf-create_post' ),
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'post_type' => get_post_type($post->ID)
         ) );
 
         wp_enqueue_media();
@@ -164,23 +161,8 @@ class WP_Post_Front {
         exit;
     }
 
-    /**
-     * included files for the modal
-     */
-    function modal_includes() {
-        require_once ABSPATH.'wp-admin/includes/template.php';
-        require_once ABSPATH.'wp-admin/includes/meta-boxes.php';
-        require_once ABSPATH.'wp-admin/includes/taxonomy.php';
 
-        require_once ABSPATH.'wp-admin/includes/bookmark.php';
-    }
 
-    /**
-     * Include necessary files
-     */
-    function includes(){
-        require_once dirname(__FILE__).'/includes/wpf-functions.php';
-    }
 
     /**
      * Add/create new term to a taxonomy
@@ -202,9 +184,30 @@ class WP_Post_Front {
      * Save post
      */
     function wpf_save_post() {
+
+        if( !wp_verify_nonce( $_POST['token'], 'wpf-create_post' ) ) return;
+
+        if( !post_type_exists( $_POST['post_type'] ) ) return;
+
+        if( !current_user_can( 'edit_posts') ) return;
+
         parse_str($_POST['postdata'],$postdata);
-        echo '<pre>';print_r($postdata);echo '</pre>';
-        wp_insert_post($postdata);
+
+        $postdata['post_type'] = $_POST['post_type'];
+
+        $post_id = wp_insert_post($postdata);
+
+        if( $post_id ) {
+            $res = array(
+                'id' => $post_id,
+                'redirect_url' => get_permalink($post_id)
+            );
+        } else {
+            $res = array(
+                'error' => $_POST['post_type'].' not created !'
+            );
+        }
+        echo json_encode($res);
         exit;
     }
 }
