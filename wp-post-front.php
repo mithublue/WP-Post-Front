@@ -1,0 +1,212 @@
+<?php
+/*
+Plugin Name: WP Post Front
+Plugin URI:
+Description:
+Version: 1.0.0
+Author: Mithu A Quayium
+Author URI:
+License: GPL2
+*/
+
+/**
+ * Copyright (c) YEAR Mithu A Quayium (email: cemithu06@gmail.com). All rights reserved.
+ *
+ * Released under the GPL license
+ * http://www.opensource.org/licenses/gpl-license.php
+ *
+ * This is an add-on for WordPress
+ * http://wordpress.org/
+ *
+ * **********************************************************************
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * **********************************************************************
+ */
+
+
+// don't call the file directly
+if ( !defined( 'ABSPATH' ) ) exit;
+
+/**
+ * Class WP_Post_Front
+ *
+ * Base class of the plugin
+ */
+
+class WP_Post_Front {
+
+    public $post_tax = array();
+
+    /**
+     * Constructor for the WP_Post_Front class
+     *
+     * Sets up all the appropriate hooks and actions
+     * within our plugin.
+     *
+     * @since 1.0.0
+     *
+     * @return void
+     */
+    public function __construct() {
+
+        add_filter( 'the_content', array( $this, 'add_front_page_buttons'), 10 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts_styles') );
+
+        add_action( 'wp_ajax_front-post-action', array( $this, 'front_post_actions' ) );
+        add_action( 'wp_ajax_nopriv_front-post-action', array( $this, 'front_post_actions' ) );
+
+        add_action( 'wp_ajax_front-post-add-term', array( $this, 'front_term_add' ) );
+        add_action( 'wp_ajax_nopriv_front-post-add-term', array( $this, 'front_term_add' ) );
+
+        add_action( 'wp_ajax_wpf_save_post', array( $this, 'wpf_save_post' ) );
+        add_action( 'wp_ajax_nopriv_wpf_save_post', array( $this, 'wpf_save_post' ) );
+        //will be added later for the modal
+        $this->includes();
+    }
+
+
+    /**
+     * Add button to the frontend post
+     */
+    public function add_front_page_buttons( $content ) {
+
+        global $post;
+
+        if( !is_single() ) return $content;
+
+        if ( !is_user_logged_in() ) return $content;
+
+        if ( !current_user_can( 'edit_posts' ) ) return $content;
+
+        $buttongs = '<div id="front-post-actions"><a href="'.admin_url().'post-new.php?post_type='. get_post_type($post->ID).'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-new" data-id="'.$post->ID.'" >' . __( 'Add New Post', 'wpf' ) . '</a></div>';
+        return $buttongs.$content;
+
+    }
+
+
+    /**
+     * Initializes the WP_Post_Front() class
+     *
+     * Checks for an existing WP_Post_Front() instance
+     * and if it doesn't find one, creates it.
+     *
+     * @since 1.0.0
+     *
+     * @return void
+     */
+    public static function init() {
+        static $instance = false;
+
+        if ( ! $instance ) {
+            $instance = new WP_Post_Front();
+        }
+
+        return $instance;
+    }
+
+    /**
+     * Enqueuing scripts and styles to the frontend
+     *
+     * @return void
+     */
+    function wp_enqueue_scripts_styles() {
+
+        if ( !is_single()  || !is_user_logged_in() ) return;
+
+        wp_enqueue_script( 'wpf-script', plugins_url( 'assets/scripts.js', __FILE__ ), array( 'jquery', 'jquery-ui-autocomplete' ) );
+
+        ?>
+        <script>
+            var ajaxurl = '<?php echo admin_url('admin-ajax.php');?>';
+        </script>
+        <?php
+        wp_enqueue_script('jquery-ui-autocomplete');
+        wp_enqueue_script('jquery-ui-sortable');
+        wp_enqueue_script( 'wp-ajax-responce-js', includes_url( 'js/wp-ajax-response.js', __FILE__ ), array( 'jquery' ) );//need for postboxjs
+        wp_enqueue_script( 'wp-wplist-js', includes_url( 'js/wp-lists.js', __FILE__ ), array( 'jquery', 'wp-ajax-responce-js' ) );//need for postboxjs
+        wp_enqueue_script( 'wp-postbox-js', admin_url( 'js/postbox.js', __FILE__ ), array( 'jquery', 'wp-wplist-js', 'jquery-ui-sortable' ) );//need for linkJS
+        wp_enqueue_script( 'wp-link-js', admin_url( 'js/link.js', __FILE__ ), array( 'jquery' ) );
+
+
+        wp_localize_script( 'wpf-script' , 'wpf_data' , array(
+            'ajaxurl' => admin_url('admin-ajax.php')
+        ) );
+
+        wp_enqueue_media();
+    }
+
+
+    /**
+     * ajax to pop up the form form post
+     */
+    function front_post_actions() {
+
+        global $post;
+
+        if ( !is_user_logged_in() ) return;
+
+        if ( !current_user_can( 'edit_posts' ) ) return;
+
+        include_once dirname( __FILE__ ) . '/includes/post-new-template.php';
+
+        exit;
+    }
+
+    /**
+     * included files for the modal
+     */
+    function modal_includes() {
+        require_once ABSPATH.'wp-admin/includes/template.php';
+        require_once ABSPATH.'wp-admin/includes/meta-boxes.php';
+        require_once ABSPATH.'wp-admin/includes/taxonomy.php';
+
+        require_once ABSPATH.'wp-admin/includes/bookmark.php';
+    }
+
+    /**
+     * Include necessary files
+     */
+    function includes(){
+        require_once dirname(__FILE__).'/includes/wpf-functions.php';
+    }
+
+    /**
+     * Add/create new term to a taxonomy
+     */
+    function front_term_add() {
+        if( !is_user_logged_in() ) return;
+
+        if( !current_user_can( 'manage_options' ) ) return;
+
+        if( !taxonomy_exists( $_POST['taxonomy'] ) ) return;
+
+        $term = filter_var ( $_POST['term'], FILTER_SANITIZE_STRING );
+        $responce = wp_insert_term( $term, $_POST['taxonomy'] );
+        echo json_encode($responce);
+        exit;
+    }
+
+    /**
+     * Save post
+     */
+    function wpf_save_post() {
+        parse_str($_POST['postdata'],$postdata);
+        echo '<pre>';print_r($postdata);echo '</pre>';
+        wp_insert_post($postdata);
+        exit;
+    }
+}
+
+WP_Post_Front::init();
