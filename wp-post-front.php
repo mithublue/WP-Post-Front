@@ -90,8 +90,9 @@ class WP_Post_Front {
 
         if ( !current_user_can( 'edit_posts' ) ) return $content;
 
-        $buttongs = '<div id="front-post-actions"><a href="'.admin_url().'post-new.php?post_type='. get_post_type($post->ID).'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-new" data-id="'.$post->ID.'" >' . __( 'Add New Post', 'wpf' ) . '</a></div>';
-        return $buttongs.$content;
+        $button_post_add = '<div id="front-post-actions"><a class="wpf-add-post" href="'.admin_url().'post-new.php?post_type='. get_post_type($post->ID).'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-new" data-id="'.$post->ID.'" >' . __( 'Add New Post', 'wpf' ) . '</a>';
+        $buttons_post_edit = '<a href="'.admin_url().'post.php?post='. $post->ID .'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-edit" data-id="'.$post->ID.'" >' . __( 'Edit This Post', 'wpf' ) . '</a></div>';
+        return $button_post_add.$buttons_post_edit.$content;
 
     }
 
@@ -138,7 +139,8 @@ class WP_Post_Front {
         wp_localize_script( 'wpf-script' , 'wpf_data' , array(
             'main_nonce' => wp_create_nonce( 'wpf-create_post' ),
             'ajaxurl' => admin_url('admin-ajax.php'),
-            'post_type' => get_post_type($post->ID)
+            'post_type' => get_post_type($post->ID),
+            'post_id' => $post->ID
         ) );
 
         wp_enqueue_media();
@@ -149,8 +151,6 @@ class WP_Post_Front {
      * ajax to pop up the form form post
      */
     function front_post_actions() {
-
-        global $post;
 
         if ( !is_user_logged_in() ) return;
 
@@ -196,6 +196,10 @@ class WP_Post_Front {
         $post_id = wp_insert_post($postdata);
 
         if( $post_id ) {
+
+            if ( post_type_supports( $_POST['post_type'], 'post-formats' )  ) {
+                set_post_format( $post_id , $postdata['post_format']);
+            }
 
             $res = array(
                 'id' => $post_id,

@@ -19,11 +19,11 @@
                 $('#front-post-actions').on( 'click', 'a' , function() {
 
                     var data_action = $(this).data( 'action' );
-                    var data_post_type = $(this).data('post_type');
+                    var data_post_type = wpf_data.post_type;
                     var data_id = '';
 
-                    if( data_action == 'edit' ) {
-                        data_id = $(this).data('id');
+                    if( data_action == 'post-edit' ) {
+                        data_id = wpf_data.post_id;
                     }
 
                     wpf_script.create_post_form( data_action, data_id , data_post_type );

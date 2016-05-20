@@ -19,15 +19,22 @@ if( !empty( $_POST['id']) && !is_numeric( $_POST['id'] ) ) return;
 $post_type = $_POST['post_type'];
 $post_id = $_POST['id'];
 
-if ( $_POST['data_action'] == 'post-new' ) :
+if( is_numeric( $post_id ) ) {
+    $postdata = get_post( $post_id );
+}
+
+if ( 1 ) :
 
     echo '<div id="wpf-add-post-container"><form class="wpf-add-post-form">';
 
+    ?>
+    <input name="ID" value="<?php echo isset( $postdata->ID ) ? $postdata->ID : '' ; ?>" type="hidden"/>
+    <?php
     if( post_type_supports( $post_type, 'title' ) )  :
         ?>
         <div class="wpf-form-field">
             <label for="post_title">Title</label>
-            <input name="post_title" size="30" value="" id="title" spellcheck="true" autocomplete="off" type="text">
+            <input name="post_title" size="30" value="<?php echo ( isset( $postdata->post_title ) ? $postdata->post_title : '' ) ?>" id="title" spellcheck="true" autocomplete="off" type="text">
         </div>
         <?php
     endif;
@@ -36,7 +43,7 @@ if ( $_POST['data_action'] == 'post-new' ) :
         ?>
         <div class="wpf-form-field">
             <label for="content">Content</label>
-            <?php wp_editor( '', 'post_content' );?>
+            <?php wp_editor( ( isset( $postdata->post_content ) ? $postdata->post_content : '' ), 'post_content' );?>
         </div>
         <?php
     endif;
@@ -51,7 +58,7 @@ if ( $_POST['data_action'] == 'post-new' ) :
         ?>
         <div class="wpf-form-field">
             <label for="excerpt">Excerpt</label>
-            <?php wp_editor( '', 'post_excerpt' );?>
+            <?php wp_editor( ( isset( $postdata->post_excerpt ) ? $postdata->post_excerpt : '' ), 'post_excerpt' );?>
         </div>
     <?php
     endif;
@@ -61,8 +68,8 @@ if ( $_POST['data_action'] == 'post-new' ) :
         <div class="wpf-form-field">
             <label for="wpf-allow-post-comments">Allow Comments</label>
             <select name="comment_status" id="">
-                <option value="open">Yes</option>
-                <option value="closed">No</option>
+                <option value="open" <?php echo comments_open( $post_id ) ? 'selected' : ''; ?>>Yes</option>
+                <option value="closed" <?php echo !comments_open( $post_id ) ? 'selected' : ''; ?>>No</option>
             </select>
         </div>
         <?php
@@ -78,12 +85,12 @@ if ( $_POST['data_action'] == 'post-new' ) :
                 $formats = $post_formats[0];
                 ?>
                 <div class="wpf-form-field">
-                    <label for="wpf-post-format">Format</label>
+                    <label for="post-format">Format</label>
                     <select name="wpf-post-format">';
                     <?php
                     foreach( $formats as $key => $format ) :
                         ?>
-                        <option value="<?php echo $format;?>"><?php _e( ucfirst($format), 'wpf' ); ?></option>
+                        <option value="<?php echo $format;?>" <?php echo get_post_format($post_id) ? 'selected': '' ; ?>><?php _e( ucfirst($format), 'wpf' ); ?></option>
                     <?php
                     endforeach;
                     ?>
@@ -135,7 +142,7 @@ if ( $_POST['data_action'] == 'post-new' ) :
         <?php
         $post_statuses = get_post_statuses();
         foreach( $post_statuses as $status => $value ) :
-            echo '<option value="'.$status.'">'.$value.'</option>';
+            echo '<option value="'.$status.'" '. ( $postdata->post_status == $status ? 'selected' : '' ).' >'.$value.'</option>';
         endforeach;
         ?>
     </select>
