@@ -1,5 +1,5 @@
-# Plugin Name #
-***Contributors:*** mithublue,cybercraftit
+## Plugin Name ##
+**Contributors:** mithublue,cybercraftit
 
 **Tags:** wp post front, post front, wp post, frontend post, post frontend
 
