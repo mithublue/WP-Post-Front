@@ -1,11 +1,7 @@
+#front-post-actions a {
+  margin-right: 10px;
+}
 .front-post-modal {
-  /*position: absolute;
-  z-index: 999;
-  left: 0;
-  right: 0;
-  top: 49px;
-  bottom: 0;
-  height: 100%;*/
   position: fixed;
   /* Stay in place */
   z-index: 1;
