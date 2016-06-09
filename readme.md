@@ -22,8 +22,3 @@ The plugin to help you create or edit post of any post type from any frontend si
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
  
-## Screenshots ##
-
-1. ![Create New Post](https://ps.w.org/wp-post-front/assets/screenshot-1.png?rev=1433963 "Create New Post")
-
-2. ![Edit Post](https://ps.w.org/wp-post-front/assets/screenshot-2.png?rev=1433963 "Edit Post")
