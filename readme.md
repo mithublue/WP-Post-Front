@@ -1,4 +1,4 @@
-## Plugin Name ##
+# Plugin Name #
 **Contributors:** mithublue,cybercraftit
 
 **Tags:** wp post front, post front, wp post, frontend post, post frontend
@@ -16,17 +16,14 @@
 The plugin to help you create or edit post of any post type from any frontend single post page
 
 
-# Installation #
+## Installation ##
 
 1. Upload `shortcode-maker` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
  
-== Screenshots ==
+## Screenshots ##
 
 1. screenshot-1
 2. screenshot-2
 3. screenshot-3
-
-== Changelog ==
-
