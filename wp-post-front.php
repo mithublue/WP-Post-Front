@@ -84,14 +84,18 @@ class WP_Post_Front {
 
         global $post;
 
+        $obj = get_post_type_object( get_post_type( $post->ID ) );
+        $label = $obj->labels->singular_name;
+
         if( !is_single() && !is_page() ) return $content;
-
         if ( !is_user_logged_in() ) return $content;
-
         if ( !current_user_can( 'edit_posts' ) ) return $content;
 
-        $button_post_add = '<div id="front-post-actions"><a class="wpf-add-post" href="'.admin_url().'post-new.php?post_type='. get_post_type($post->ID).'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-new" data-id="'.$post->ID.'" >' . __( 'Add New Post', 'wpf' ) . '</a>';
-        $buttons_post_edit = '<a href="'.admin_url().'post.php?post='. $post->ID .'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-edit" data-id="'.$post->ID.'" >' . __( 'Edit This Post', 'wpf' ) . '</a></div>';
+        $button_post_add = '<div id="front-post-actions"><a class="wpf-add-post" href="'.admin_url().'post-new.php?post_type='. get_post_type($post->ID).'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-new" data-id="'.$post->ID.'" >' . __( 'Add New '.$label, 'wpf' ) . '</a>';
+
+        if( get_current_user_id() == $post->post_author ) {
+            $buttons_post_edit = '<a href="'.admin_url().'post.php?post='. $post->ID .'" data-post_type="' . get_post_type($post->ID) . '" data-action="post-edit" data-id="'.$post->ID.'" >' . __( 'Edit This '.$label, 'wpf' ) . '</a></div>';
+        }
         return $button_post_add.$buttons_post_edit.$content;
 
     }
@@ -153,7 +157,6 @@ class WP_Post_Front {
     function front_post_actions() {
 
         if ( !is_user_logged_in() ) return;
-
         if ( !current_user_can( 'edit_posts' ) ) return;
 
         include_once dirname( __FILE__ ) . '/includes/post-new-template.php';
@@ -169,9 +172,7 @@ class WP_Post_Front {
      */
     function front_term_add() {
         if( !is_user_logged_in() ) return;
-
-        if( !current_user_can( 'manage_options' ) ) return;
-
+        if( !current_user_can( 'edit_posts' ) ) return;
         if( !taxonomy_exists( $_POST['taxonomy'] ) ) return;
 
         $term = filter_var ( $_POST['term'], FILTER_SANITIZE_STRING );

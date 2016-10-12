@@ -18,6 +18,9 @@
 .front-post-modal ul li {
   list-style: none;
 }
+.front-post-modal .wp-editor-area {
+  color: #000 !important;
+}
 .front-post-modal #wpf-add-post-container {
   margin: 5% auto;
   /* 15% from the top and centered */
