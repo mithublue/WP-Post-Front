@@ -3,7 +3,7 @@
 Plugin Name: WP Post Front
 Plugin URI:
 Description:
-Version: 1.0.0
+Version: 1.1
 Author: Mithu A Quayium
 Author URI:
 License: GPL2
@@ -218,3 +218,14 @@ class WP_Post_Front {
 }
 
 WP_Post_Front::init();
+
+
+// add plugin upgrade notification
+add_action('in_plugin_update_message-wp-post-front/wp-post-front.php', 'showUpgradeNotification', 10, 2);
+function showUpgradeNotification($currentPluginMetadata, $newPluginMetadata){
+    // check "upgrade_notice"
+    if (isset($newPluginMetadata->upgrade_notice) && strlen(trim($newPluginMetadata->upgrade_notice)) > 0){
+        echo '<p style="background-color: #d54e21; padding: 10px; color: #f9f9f9; margin-top: 10px"><strong>Important Upgrade Notice:</strong></p> ';
+        echo esc_html($newPluginMetadata->upgrade_notice), '</p>';
+    }
+}
